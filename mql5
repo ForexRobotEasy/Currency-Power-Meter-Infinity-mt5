@@ -1,0 +1,69 @@
+
+// Currency Power Meter Infinity MT5
+// Developed by Forex Robot Easy Team
+// Developer's Site: forexroboteasy.com
+
+// Define the necessary input parameters
+input int Period = 14; // Period for calculating currency strength
+input ENUM_APPLIED_PRICE Price = PRICE_CLOSE; // Price type used for calculations
+
+// Define the necessary variables
+double currencyStrength[]; // Array to store currency strength values
+string currencyPairs[]; // Array to store currency pair names
+
+// Define the OnInit() function
+void OnInit()
+{
+    // Initialize currency pair names
+    currencyPairs[0] = 'EURUSD';
+    currencyPairs[1] = 'GBPUSD';
+    currencyPairs[2] = 'USDJPY';
+    currencyPairs[3] = 'USDCHF';
+    currencyPairs[4] = 'AUDUSD';
+    currencyPairs[5] = 'NZDUSD';
+    currencyPairs[6] = 'USDCAD';
+    currencyPairs[7] = 'USDSEK';
+    currencyPairs[8] = 'USDNOK';
+    currencyPairs[9] = 'USDZAR';
+    
+    // Calculate currency strength for each currency pair
+    for (int i = 0; i < ArraySize(currencyPairs); i++)
+    {
+        currencyStrength[i] = iCustom(NULL, 0, 'Currency Strength Indicator', Period, Price, currencyPairs[i]);
+    }
+}
+
+// Define the OnTick() function
+void OnTick()
+{
+    // Check if current chart is a currency pair chart
+    if (ChartIsSymbol())
+    {
+        // Get the index of the current currency pair
+        int currencyPairIndex = ArrayIndex(currencyPairs, ChartSymbol());
+        
+        // Check if the currency pair is valid
+        if (currencyPairIndex >= 0)
+        {
+            // Display line chart for the current currency pair
+            ChartIndicatorAdd(0, currencyStrength[currencyPairIndex]);
+        }
+    }
+}
+
+// Define the OnChartEvent() function
+void OnChartEvent(const int id, const long& lparam, const double& dparam, const string& sparam)
+{
+    // Check if the event is related to a mouse click
+    if (id == CHARTEVENT_CLICK)
+    {
+        // Check if the click position is within the mobile panel area
+        if (lparam >= 0 && lparam <= 100 && dparam >= 0 && dparam <= 100)
+        {
+            // Switch to the next currency pair
+            int currentCurrencyPairIndex = ArrayIndex(currencyPairs, ChartSymbol());
+            int nextCurrencyPairIndex = (currentCurrencyPairIndex + 1) % ArraySize(currencyPairs);
+            ChartOpen(currencyPairs[nextCurrencyPairIndex]);
+        }
+    }
+}
